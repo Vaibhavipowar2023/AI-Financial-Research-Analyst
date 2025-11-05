@@ -5,3 +5,5 @@ yfinance
 python-dotenv
 openai
 requests
+streamlit
+
