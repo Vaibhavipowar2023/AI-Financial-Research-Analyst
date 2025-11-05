@@ -3,9 +3,10 @@ from dotenv import load_dotenv
 from crew.crew import run_pipeline
 import datetime as dt
 
-# Load environment variables
+# --- Load environment variables ---
 load_dotenv()
 
+# --- Page Config ---
 st.set_page_config(
     page_title="Finance CrewAI – Market Summary",
     page_icon="📊",
@@ -19,74 +20,94 @@ Type a company name or stock ticker (e.g., *Infosys*, *AAPL*, *TSLA*, *RELIANCE.
 and click **Generate Report** to get a detailed news and market summary.
 """)
 
-# User input
-query = st.text_input("Enter company name or ticker symbol:", placeholder="e.g. Infosys or AAPL")
+# --- Cache pipeline execution ---
+@st.cache_data(show_spinner=False)
+def cached_run_pipeline(ticker):
+    """Cache the run_pipeline call to avoid repeated API hits."""
+    return run_pipeline(ticker=ticker, period="1mo")
 
-# Button
-if st.button("Generate Report"):
-    if not query.strip():
-        st.warning("Please enter a company or ticker name.")
-        st.stop()
 
-    # --- Step 1: Detect basic ticker ---
-    q = query.lower()
-    ticker_map = {
-        "infosys": "INFY.NS",
-        "apple": "AAPL",
-        "tesla": "TSLA",
-        "google": "GOOGL",
-        "alphabet": "GOOGL",
-        "microsoft": "MSFT",
-        "amazon": "AMZN",
-        "reliance": "RELIANCE.NS",
-        "tcs": "TCS.NS",
-        "hdfc": "HDFCBANK.NS",
-    }
-    ticker = ticker_map.get(q, query.upper())
+def main():
+    query = st.text_input("Enter company name or ticker symbol:", placeholder="e.g. Infosys or AAPL")
 
-    st.markdown(f"### 🏢 Selected Ticker: `{ticker}`")
+    if st.button("Generate Report"):
+        if not query.strip():
+            st.warning("Please enter a company or ticker name.")
+            return
 
-    # --- Step 2: Run Crew pipeline ---
-    with st.spinner(f"Generating market report for {ticker}..."):
-        try:
-            result = run_pipeline(ticker=ticker, period="1mo")
-        except Exception as e:
-            st.error(f"Error while running analysis: {e}")
-            st.stop()
+        # --- Step 1: Detect ticker ---
+        q = query.lower()
+        ticker_map = {
+            "infosys": "INFY.NS",
+            "apple": "AAPL",
+            "tesla": "TSLA",
+            "google": "GOOGL",
+            "alphabet": "GOOGL",
+            "microsoft": "MSFT",
+            "amazon": "AMZN",
+            "reliance": "RELIANCE.NS",
+            "tcs": "TCS.NS",
+            "hdfc": "HDFCBANK.NS",
+        }
+        ticker = ticker_map.get(q, query.upper())
 
-    # --- Step 3: Display Results ---
-    st.success("✅ Report generated successfully!")
+        st.markdown(f"### 🏢 Selected Ticker: `{ticker}`")
 
-    # Price snapshot
-    px = result.get("price_snapshot", {})
-    st.markdown(f"""
-    **📈 Price Snapshot**
-    - Last Close: `{px.get('last_close', 'N/A')}`
-    - First Close: `{px.get('first_close', 'N/A')}`
-    - Change (%): `{px.get('change_pct', 'N/A')}`
-    """)
+        # --- Step 2: Run Crew Pipeline ---
+        with st.spinner(f"Generating market report for {ticker}..."):
+            try:
+                result = cached_run_pipeline(ticker)
+            except Exception as e:
+                st.error(f"⚠️ Could not generate report.\n\n**Error:** {e}")
+                return
 
-    # Full markdown report
-    st.markdown("---")
-    st.markdown("### 🧠 Full Market Report")
-    st.markdown(result.get("report_markdown", "_No report available._"))
+        # --- Step 3: Display Results ---
+        st.success("✅ Report generated successfully!")
 
-    # # --- Optional: Display sub-sections separately ---
-    with st.expander("📰 News Summary"):
-        st.markdown(result.get("news_summary", "_No news summary available._"))
+        px = result.get("price_snapshot", {})
+        st.divider()
+        st.subheader("📈 Price Snapshot")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Last Close", px.get("last_close", "N/A"))
+        col2.metric("First Close", px.get("first_close", "N/A"))
+        col3.metric("Change (%)", px.get("change_pct", "N/A"))
 
-    # with st.expander("📊 Indicators Summary"):
-    #     st.markdown(result.get("indicators_summary", "_No indicator summary available._"))
-    #
-    # with st.expander("🎯 Strategy"):
-    #     st.markdown(result.get("strategy", "_No strategy available._"))
+        st.divider()
+        st.subheader("🧠 Full Market Report")
+        st.markdown(result.get("report_markdown", "_No report available._"))
 
-    # # --- Optional: Download report ---
-    # report_text = result.get("report_markdown", "")
-    # if report_text:
-    #     st.download_button(
-    #         label="📥 Download Report",
-    #         data=report_text,
-    #         file_name=f"{ticker}_market_report_{dt.date.today()}.md",
-    #         mime="text/markdown",
-    #     )
+        # --- Sentiment Badge (if present) ---
+        sentiment = result.get("sentiment", "")
+        if sentiment:
+            color_map = {
+                "Positive": "🟢",
+                "Negative": "🔴",
+                "Mixed": "🟡",
+            }
+            st.markdown(f"### Sentiment Overview: {color_map.get(sentiment, '🟡')} **{sentiment}**")
+
+        # --- News Section ---
+        st.divider()
+        news_summary = result.get("news_summary", "")
+        if not news_summary.strip():
+            st.info("No recent news found for this company.")
+        else:
+            with st.expander("📰 News Summary", expanded=True):
+                st.markdown(news_summary)
+
+        # --- Optional download ---
+        report_text = result.get("report_markdown", "")
+        if report_text:
+            st.download_button(
+                label="📥 Download Report",
+                data=report_text,
+                file_name=f"{ticker}_market_report_{dt.date.today()}.md",
+                mime="text/markdown",
+            )
+
+        st.divider()
+        st.caption("🔹 Powered by CrewAI | Data from Yahoo Finance, OpenAI & News APIs | © 2025 Finance CrewAI")
+
+
+if __name__ == "__main__":
+    main()
