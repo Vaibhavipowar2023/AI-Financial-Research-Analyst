@@ -6,6 +6,6 @@ python-dotenv
 openai
 requests
 streamlit
-pip install PyYAML
+PyYAML
 
 
