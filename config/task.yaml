@@ -1,0 +1,63 @@
+news:
+  description: >
+    Analyze and summarize the latest financial headlines for "{ticker}".
+    Include 3–5 key news items with their overall sentiment (Positive, Negative, or Neutral).
+  expected_output: >
+    A concise but detailed summary of the latest news and their impact on the stock's price and market sentiment.
+  agent: news
+  format: |
+    📰 {ticker} News Summary:
+    {summary}
+
+indicators:
+  description: >
+    Analyze recent price movement and compute key indicators (RSI, EMA, SMA) for "{ticker}".
+    Use these metrics to describe short-term and medium-term technical outlook.
+  expected_output: >
+    A clear and structured summary of technical indicators for "{ticker}".
+  agent: finance
+  format: |
+    📊 {ticker} Technical Indicators:
+    - RSI(14): {rsi_value}
+    - EMA(14): {ema_value}
+    - SMA(50): {sma_value}
+    {analysis}
+
+strategy:
+  description: >
+    Based on the indicators and news sentiment for "{ticker}", suggest a short-term trading strategy.
+    Include a clear BUY, HOLD, or SELL recommendation and one-sentence reasoning.
+  expected_output: >
+    A one-paragraph summary including recommendation and rationale.
+  agent: strategy
+  format: |
+    🎯 {ticker} Strategy Recommendation:
+    {recommendation}
+
+report:
+  description: >
+    Compile a structured markdown market summary for "{ticker}", combining all prior results (news, indicators, strategy).
+    Write it in a professional analyst tone, formatted with markdown and emojis.
+  expected_output: >
+    A final, clean markdown report containing:
+    - A Price Overview (current price, % change, indicators)
+    - News Summary (3–5 key headlines)
+    - Market Insight (brief analysis of the day's sentiment)
+    - Recommendation (BUY, HOLD, SELL)
+  agent: report
+  format: |
+    📊 {ticker} Market Summary ({date})
+
+    **Price Overview**
+    - Current Price: ${last_close}
+    - Daily Change: {change_pct}%
+    - Indicators: {indicators_summary}
+
+    **Top News**
+    {headlines}
+
+    **Market Insight**
+    {news_summary}
+
+    **Recommendation**
+    {strategy}

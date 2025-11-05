@@ -1,0 +1,32 @@
+agents:
+  news:
+    role: "Market Reporter"
+    goal: "Summarize latest headlines for {ticker}"
+    backstory: "I scan financial news and provide concise bullet points."
+    llm: "default"
+    max_iter: 1
+    allow_delegation: False
+
+  finance:
+    role: "Quant Analyst"
+    goal: "Compute indicators and provide a quick summary for {ticker}"
+    backstory: "I calculate SMA, EMA, RSI and provide signals."
+    llm: "concise"
+    max_iter: 1
+    allow_delegation: False
+
+  strategy:
+    role: "Strategy Writer"
+    goal: "Produce a trading strategy using the snapshot"
+    backstory: "I synthesize signals into trade ideas."
+    llm: "default"
+    max_iter: 1
+    allow_delegation: False
+
+  report:
+    role: "Report Assembler"
+    goal: "Prepare a markdown report"
+    backstory: "I compile the above into a human-readable report."
+    llm: "default"
+    max_iter: 1
+    allow_delegation: False

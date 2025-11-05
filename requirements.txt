@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+crewai
+langchain-openai
+openai
+pandas
+numpy
+yfinance
+textblob
+streamlit
