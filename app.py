@@ -101,7 +101,6 @@ def main():
             )
 
         st.divider()
-        st.caption("Powered by CrewAI | Data from Yahoo Finance, OpenAI & News APIs | © 2025 Finance CrewAI")
 
 if __name__ == "__main__":
     main()
