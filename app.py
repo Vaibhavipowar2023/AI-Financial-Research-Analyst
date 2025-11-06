@@ -9,11 +9,10 @@ load_dotenv()
 # --- Page Config ---
 st.set_page_config(
     page_title="Finance CrewAI – Market Summary",
-    page_icon="📊",
     layout="centered",
 )
 
-st.title("📊 Finance CrewAI – Market Summary Assistant")
+st.title(" Finance CrewAI – Market Summary Assistant")
 
 st.markdown("""
 Type a company name or stock ticker (e.g., *Infosys*, *AAPL*, *TSLA*, *RELIANCE.NS*)  
@@ -51,18 +50,18 @@ def main():
         }
         ticker = ticker_map.get(q, query.upper())
 
-        st.markdown(f"### 🏢 Selected Ticker: `{ticker}`")
+        st.markdown(f"### Selected Ticker: `{ticker}`")
 
         # --- Step 2: Run Crew Pipeline ---
         with st.spinner(f"Generating market report for {ticker}..."):
             try:
                 result = cached_run_pipeline(ticker)
             except Exception as e:
-                st.error(f"⚠️ Could not generate report.\n\n**Error:** {e}")
+                st.error(f" Could not generate report.\n\n**Error:** {e}")
                 return
 
         # --- Step 3: Display Results ---
-        st.success("✅ Report generated successfully!")
+        st.success(" Report generated successfully!")
 
         px = result.get("price_snapshot", {})
         st.divider()
@@ -73,7 +72,7 @@ def main():
         col3.metric("Change (%)", px.get("change_pct", "N/A"))
 
         st.divider()
-        st.subheader("🧠 Full Market Report")
+        st.subheader(" Full Market Report")
         st.markdown(result.get("report_markdown", "_No report available._"))
 
         # --- Sentiment Badge (if present) ---
@@ -92,14 +91,14 @@ def main():
         if not news_summary.strip():
             st.info("No recent news found for this company.")
         else:
-            with st.expander("📰 News Summary", expanded=True):
+            with st.expander(" News Summary", expanded=True):
                 st.markdown(news_summary)
 
         # --- Optional download ---
         report_text = result.get("report_markdown", "")
         if report_text:
             st.download_button(
-                label="📥 Download Report",
+                label=" Download Report",
                 data=report_text,
                 file_name=f"{ticker}_market_report_{dt.date.today()}.md",
                 mime="text/markdown",
